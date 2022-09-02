@@ -2,28 +2,31 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/fatih/color"
 	"github.com/inancgumus/screen"
 	"github.com/probandula/figlet4go"
+	"github.com/tidwall/gjson"
 )
 
 const welcomeText = "Welcome to Terminal quiz app! Here, you can participate in a quiz by reading data from an API or get quiz data from a JSON file in the same directory. Use the options below to select a JSON file, create a quiz-ready JSON file or use an API by mentioning the URL (note that if you use the API method, the response must be in the correct data format.)"
 const jsonFormatText = `
 [
 	{
-		question: "What is the age of the universe?",
-		options: [
+		"question": "What is the age of the universe?",
+		"options": [
 			"10.9 Bn Years",
 			"8 Bn Years",
 			"16.2 Bn Years",
 			"13.8 Bn Years"
 		],
-		correct: 3
+		"correct": 3
 	}
 ]
 `
@@ -67,7 +70,7 @@ func fileReadMode() {
 		color.Red("Something went wrong when reading the file! The specified file may not exist in the current directory or the name is wrong. \nerr: [%v]", err)
 		return
 	}
-	fmt.Printf("\nContents of file: %v\n", string(data))
+	questionInit(string(data))
 }
 
 func fileWriteMode() {
@@ -139,6 +142,48 @@ func endPrompt() {
 
 func questionInit(data string) {
 	resetTerminal()
+	if len(strings.TrimSpace(data)) == 0 || !isJSON(strings.TrimSpace(data))  {
+		color.Red("Something is wrong with the input data! Check if the data in the JSON file is valid.")
+		return
+	}
+	m, ok := gjson.Parse(data).Value().([]interface{})
+	if !ok {
+		color.Red("Something went wrong! Data may not be in the correct format. err: [%v]", ok)
+		return
+	}
+	correctResponses := 0
+	incorrectResponses := 0
+	for i := 0; i < len(m); i++ {
+		resetTerminal()
+		fmt.Printf("%v   %v\n\n", (m[i].(map[string]interface{}))["question"], color.CyanString("Q: %v of %v", (i + 1), len(m)))
+		options := (m[i].(map[string]interface{}))["options"].([]interface{})
+		correct := (m[i].(map[string]interface{}))["correct"].(float64)
+		for j := 0; j < len(options); j++ {
+			fmt.Printf("%v. %v\n", (j + 1), options[j])
+		}
+		fmt.Print("\nAnswer: ")
+		text, _ := reader.ReadString('\n')
+		if result, err := strconv.Atoi(strings.TrimSpace(text)); err != nil {
+			color.Red("Something went wrong! err: [%v]", err)
+			return
+		} else if (result - 1) == int(correct) {
+			color.Green("\nCorrect Answer!")
+			correctResponses++
+		} else {
+			color.Red("\nIncorrect Answer!")
+			incorrectResponses++
+		}
+		if (i + 1) < len(m) {
+			color.Yellow("\nProceeding to next question ...")
+		}
+		time.Sleep(999999999)
+	}
+	fmt.Printf("\n%v: %v of %v, %v: %v of %v", color.GreenString("Correct"), correctResponses, len(m), color.RedString("Incorrect"), incorrectResponses, len(m))
+}
+
+func isJSON(s string) bool {
+	var js interface{}
+	return json.Unmarshal([]byte(s), &js) == nil
 }
 
 func resetTerminal() {
