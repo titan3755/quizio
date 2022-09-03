@@ -38,5 +38,15 @@
 			"Michael Faraday"
 		],
 		"correct": 1
+	},
+	{
+		"question": "What is the duration of World War 2?",
+		"options": [
+			"1919-1945",
+			"1939-1946",
+			"1939-1945",
+			"1937-1950"
+		],
+		"correct": 2
 	}
 ]
