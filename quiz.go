@@ -16,26 +16,27 @@ import (
 	"github.com/inancgumus/screen"
 	"github.com/probandula/figlet4go"
 	"github.com/tidwall/gjson"
+	_ "github.com/tidwall/sjson"
 )
 
 type QuizQuestion struct {
-	question string
-	options []interface{}
-	correct int
+	Question string 
+	Options []interface{} 
+	Correct int 
 }
 
 const welcomeText = "Welcome to Terminal quiz app! Here, you can participate in a quiz by reading data from an API or get quiz data from a JSON file in the same directory. Use the options below to select a JSON file, create a quiz-ready JSON file or use an API by mentioning the URL (note that if you use the API method, the response must be in the correct data format.)"
 const jsonFormatText = `
 [
 	{
-		"question": "What is the age of the universe?",
-		"options": [
+		"Question": "What is the age of the universe?",
+		"Options": [
 			"10.9 Bn Years",
 			"8 Bn Years",
 			"16.2 Bn Years",
 			"13.8 Bn Years"
 		],
-		"correct": 3
+		"Correct": 3
 	}
 ]
 `
@@ -46,11 +47,11 @@ var requestClient = req.C()
 var menuInitTimes int = 0
 
 func main() {
-	resetTerminal()
-	welcomeASCIIText("Quiz-APP", "init")
-	fmt.Println(welcomeText)
 	for {
+		resetTerminal()
 		if menuInitTimes == 0 {
+			welcomeASCIIText("Quiz-APP", "init")
+			fmt.Println(welcomeText)
 			fmt.Print("\n---Menu---\n")
 		} else {
 			welcomeASCIIText("QUIZ-MENU", "menu")
@@ -168,7 +169,7 @@ func questionWriter() {
 	text, _ := reader.ReadString('\n')
 	dataFile, readErr := os.ReadFile(strings.TrimSpace(text))
 	if readErr != nil {
-		color.Red("Something went wrong when reading to the file! The specified file may not exist in the given directory or there might be something wrong with the path. \nerr: [%v]", readErr)
+		color.Red("Something went wrong when reading the file! The specified file may not exist in the given directory or there might be something wrong with the path. \nerr: [%v]", readErr)
 		return
 	}
 	if len(string(dataFile)) == 0  {
@@ -196,9 +197,65 @@ func questionWriter() {
 	}
 	color.Green("\nInitializing quiz-writer ...")
 	time.Sleep(time.Second * 2)
-	resetTerminal()
 	for {
-
+		resetTerminal()
+		color.New(color.BgWhite, color.FgBlack).Println(" Quiz-Writer (New Question) ")
+		var questionOptions []interface{}
+		fmt.Print("\nQuestion: ")
+		questionResponse, _ := reader.ReadString('\n')
+		for optionCount := 0; optionCount < 4; optionCount++ {
+			fmt.Printf("\nOption %v: ", (optionCount + 1))
+			optionResponse, _ := reader.ReadString('\n')
+			questionOptions = append(questionOptions, strings.TrimSpace(optionResponse))
+		}
+		fmt.Print("\nCorrect Answer (option number): ")
+		correctResponse, _ := reader.ReadString('\n')
+		convInt, errConv := strconv.Atoi(strings.TrimSpace(correctResponse))
+		if errConv != nil {
+			color.Red("Something went wrong when parsing response! The \"correct\" key must have non-number value. err: [%v]", errConv)
+			color.Yellow("[WARNING] Resetting quiz-writer plz wait ...")
+			time.Sleep(time.Second * 2)
+			continue
+		}
+		quizQ := QuizQuestion{Question: strings.TrimSpace(questionResponse), Options: questionOptions, Correct: (convInt - 1)}
+		readFileJson, readFileErr := os.ReadFile(strings.TrimSpace(text))
+		if readFileErr != nil {
+			color.Red("Something went wrong when reading the file! The specified file may not exist in the given directory or there might be something wrong with the path. \nerr: [%v]", readFileErr)
+			color.Yellow("[WARNING] Resetting quiz-writer plz wait ...")
+			time.Sleep(time.Second * 2)
+			continue
+		}
+		var quiz []QuizQuestion
+		errUnm := json.Unmarshal([]byte(readFileJson), &quiz)
+		quiz = append(quiz, quizQ)
+		if errUnm != nil {
+			color.Red("Something went wrong when setting the JSON values! \nerr: [%v]", errUnm)
+			color.Yellow("[WARNING] Resetting quiz-writer plz wait ...")
+			time.Sleep(time.Second * 2)
+			continue
+		}
+		result, errMarshal := json.Marshal(quiz)
+		if errMarshal != nil {
+			color.Red("Something went wrong when setting the JSON values! \nerr: [%v]", errMarshal)
+			color.Yellow("[WARNING] Resetting quiz-writer plz wait ...")
+			time.Sleep(time.Second * 2)
+			continue
+		}
+		errWriteJson := os.WriteFile(strings.TrimSpace(text), result, 0644)
+		if errWriteJson != nil {
+			color.Red("Something went wrong when writing the new JSON array to the file! \nerr: [%v]", errWriteJson)
+			color.Yellow("[WARNING] Resetting quiz-writer plz wait ...")
+			time.Sleep(time.Second * 2)
+			continue
+		}
+		color.Green("Successfully added new question!")
+		fmt.Printf("\n%v", color.YellowString("Add another question? (y/n) "))
+		continueResponse, _ := reader.ReadString('\n')
+		if strings.TrimSpace(continueResponse) == "y" {
+			continue
+		} else {
+			break
+		}
 	}
 }
 
@@ -226,9 +283,9 @@ func questionInit(data string) {
 	correctResponses := 0
 	incorrectResponses := 0
 	for l := 0; l < len(m); l++ {
-		question := (m[l].(map[string]interface{}))["question"]
-		options := (m[l].(map[string]interface{}))["options"].([]interface{})
-		correct := (m[l].(map[string]interface{}))["correct"]
+		question := (m[l].(map[string]interface{}))["Question"]
+		options := (m[l].(map[string]interface{}))["Options"]
+		correct := (m[l].(map[string]interface{}))["Correct"]
 		if question == nil || options == nil || correct == nil {
 			color.Red("The data in the JSON file or data from API is not in the correct format! You can take a look at the correct data format for quiz questions by the 5th option in the menu. err: [invalid_data_format]")
 			return
@@ -241,9 +298,9 @@ func questionInit(data string) {
 	}
 	for i := 0; i < len(m); i++ {
 		resetTerminal()
-		question := (m[i].(map[string]interface{}))["question"]
-		options := (m[i].(map[string]interface{}))["options"].([]interface{})
-		correct := (m[i].(map[string]interface{}))["correct"].(float64)
+		question := (m[i].(map[string]interface{}))["Question"]
+		options := (m[i].(map[string]interface{}))["Options"].([]interface{})
+		correct := (m[i].(map[string]interface{}))["Correct"].(float64)
 		fmt.Printf("%v %v   %v\n\n", color.New(color.BgWhite, color.FgBlack).Sprintf("Question"), color.HiWhiteString("%v", question), color.New(color.BgHiCyan, color.FgBlack).Sprintf(" Q: %v of %v ", (i + 1), len(m)))
 		for j := 0; j < len(options); j++ {
 			fmt.Printf("%v. %v\n", (j + 1), options[j])

@@ -11,6 +11,7 @@ require (
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
 	github.com/probandula/figlet4go v0.0.0-20190224160619-d6cef5b186ea
 	github.com/tidwall/gjson v1.14.3
+	github.com/tidwall/sjson v1.2.5
 )
 
 require (
