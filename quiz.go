@@ -286,6 +286,7 @@ func questionInit(data string) {
 	var correctQuestions []string = make([]string, 0)
 	var incorrectQuestions []string = make([]string, 0)
 	var answers []string = make([]string, 0)
+	var totalQuestions []string = make([]string, 0)
 	for l := 0; l < len(m); l++ {
 		question := (m[l].(map[string]interface{}))["Question"]
 		options := (m[l].(map[string]interface{}))["Options"]
@@ -305,6 +306,7 @@ func questionInit(data string) {
 		question := (m[i].(map[string]interface{}))["Question"].(string)
 		options := (m[i].(map[string]interface{}))["Options"].([]interface{})
 		correct := (m[i].(map[string]interface{}))["Correct"].(float64)
+		totalQuestions = append(totalQuestions, question)
 		fmt.Printf("%v\n", color.New(color.BgWhite, color.FgBlack).Sprintf("Quiz initiated %v", color.New(color.FgBlack).Sprintf(" ( Q: %v of %v ) ", (i + 1), len(m))))
 		quizQuestionTableCreator(question)
 		fmt.Print("\n")
@@ -343,7 +345,7 @@ func questionInit(data string) {
 	resetTerminal()
 	ClearTerminal()
 	fmt.Printf("%v\n", color.New(color.BgWhite, color.FgBlack).Sprintf("   Quiz Answer Table (may be larger than console window)  "))
-	finalQuestionAnswersTableCreator(correctQuestions, incorrectQuestions, answers)
+	finalQuestionAnswersTableCreator(correctQuestions, incorrectQuestions, totalQuestions, answers)
 	fmt.Printf("\n%v: %v of %v, %v: %v of %v\n", color.New(color.BgGreen, color.FgBlack).Sprintf("Correct"), correctResponses, len(m), color.New(color.BgRed, color.FgBlack).Sprintf("Incorrect"), incorrectResponses, len(m))
 }
 
@@ -367,21 +369,27 @@ func quizQuestionTableCreator(question string) {
 	t.Render()
 }
 
-func finalQuestionAnswersTableCreator(correct []string, incorrect []string, answers []string) {
+func finalQuestionAnswersTableCreator(correct []string, incorrect []string, questions []string, answers []string) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.SetStyle(table.StyleLight)
 	t.AppendHeader(table.Row{"#", "Question", "Answer", "State"})
 	rowNum := 1
-	for g := 0; g < len(correct); g++ {
-		t.AppendRow([]interface{}{rowNum, correct[g], answers[rowNum - 1], "✅"})
-		t.AppendSeparator()
-		rowNum++
-	}
-	for x := 0; x < len(incorrect); x++ {
-		t.AppendRow([]interface{}{rowNum, incorrect[x], answers[rowNum - 1], "❌"})
-		t.AppendSeparator()
-		rowNum++
+	for g := 0; g < len(questions); g++ {
+		for s := 0; s < len(correct); s++ {
+			if questions[g] == correct[s] {
+				t.AppendRow([]interface{}{rowNum, questions[g], answers[rowNum - 1], "✅"})
+				t.AppendSeparator()
+				rowNum++
+			}
+		}
+		for b := 0; b < len(incorrect); b++ {
+			if questions[g] == incorrect[b] {
+				t.AppendRow([]interface{}{rowNum, questions[g], answers[rowNum - 1], "❌"})
+				t.AppendSeparator()
+				rowNum++
+			}
+		}
 	}
 	t.Render()
 }
