@@ -28,5 +28,13 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Please make sure to update tests as appropriate.
 
+## Upcoming Features
+QuizIO is still in early stages and a lot of features will come in the future along with numerous bug fixes.
+
+* [UPCOMING] Question timer
+* [UPCOMING] More data sources [eg. XML files]
+* [UPCOMING] Question order randomizer
+* [UPCOMING] Better UI and QoL improvements
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
