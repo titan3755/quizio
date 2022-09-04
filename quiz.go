@@ -25,7 +25,7 @@ type QuizQuestion struct {
 	Correct int 
 }
 
-const welcomeText = "Welcome to Terminal quiz app! Here, you can participate in a quiz by reading data from an API or get quiz data from a JSON file in the same directory. Use the options below to select a JSON file, create a quiz-ready JSON file or use an API by mentioning the URL (note that if you use the API method, the response must be in the correct data format.)"
+const welcomeText = "Welcome to Terminal quiz app QuizIO! Here, you can participate in a quiz by reading data from an API or get quiz data from a JSON file in the same directory. Use the options below to select a JSON file, create a quiz-ready JSON file or use an API by mentioning the URL (note that if you use the API method, the response must be in the correct data format.)"
 const jsonFormatText = `
 [
 	{
@@ -51,7 +51,7 @@ func main() {
 		resetTerminal()
 		ClearTerminal()
 		if menuInitTimes == 0 {
-			welcomeASCIIText("Quiz-APP", "init")
+			welcomeASCIIText("QuizIO", "init")
 			fmt.Println(welcomeText)
 			fmt.Print("\n---Menu---\n")
 		} else {
