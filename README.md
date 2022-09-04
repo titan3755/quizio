@@ -20,7 +20,7 @@ This mode can be used to create a quiz data file by providing the name of the JS
 #### `API data mode:`
 This mode can be used to get the quiz data from an API by providing the URL in the input prompt. The API must provide the quiz data in the correct format. The quiz will be initiated automatically after the file data has been read.
 #### `Quiz writer mode:`
-This mode can be used to modify a newly created or existing JSON file from within the app and you will not need to manually modify a JSON file from another editor.
+This mode can be used to modify a newly created or existing JSON file from within the app and you will not need to manually modify a JSON file from another editor. An option to wipe the provided JSON file will come as existing JSON files may not contain data in the required format. You can also proceed with the existing JSON file.
 #### `Preview data format mode:`
 This is not exactly a "mode" but a display of the required data format that is mandatory in the input JSON files or API data. If the JSON data is not in the format showed in this mode, the quiz will not be initiated and an error will occur.
 ## Contributing
