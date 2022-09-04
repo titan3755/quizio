@@ -4,14 +4,12 @@ go 1.19
 
 require (
 	github.com/alecthomas/chroma/v2 v2.2.0
-	github.com/coreybutler/go-timer v1.0.4
 	github.com/fatih/color v1.13.0
-	github.com/gosuri/uilive v0.0.4
 	github.com/imroc/req/v3 v3.22.0
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
+	github.com/jedib0t/go-pretty/v6 v6.3.8
 	github.com/probandula/figlet4go v0.0.0-20190224160619-d6cef5b186ea
 	github.com/tidwall/gjson v1.14.3
-	github.com/tidwall/sjson v1.2.5
 )
 
 require (
@@ -29,8 +27,10 @@ require (
 	github.com/marten-seemann/qtls-go1-19 v0.1.0-beta.1 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect

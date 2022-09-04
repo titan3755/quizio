@@ -5,18 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+	"runtime"
 	"github.com/alecthomas/chroma/v2/quick"
-	_ "github.com/coreybutler/go-timer"
 	"github.com/fatih/color"
-	_ "github.com/gosuri/uilive"
 	"github.com/imroc/req/v3"
 	"github.com/inancgumus/screen"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/probandula/figlet4go"
 	"github.com/tidwall/gjson"
-	_ "github.com/tidwall/sjson"
 )
 
 type QuizQuestion struct {
@@ -49,6 +49,7 @@ var menuInitTimes int = 0
 func main() {
 	for {
 		resetTerminal()
+		ClearTerminal()
 		if menuInitTimes == 0 {
 			welcomeASCIIText("Quiz-APP", "init")
 			fmt.Println(welcomeText)
@@ -117,6 +118,7 @@ func apiMode() {
 	color.Cyan("You have selected \"API quiz data mode\". Mention the API URL in the input below and the quiz will be initialized automatically.\n")
 	fmt.Print("\nAPI URL: ")
 	text, _ := reader.ReadString('\n')
+	color.Yellow("\nGetting data ...")
 	resp, err := requestClient.R().Get(strings.TrimSpace(text))
 	if err != nil {
 		color.Red("Something went wrong when querying the API! The API may not provide data in the correct format or is unavailable or the URL may be invalid. \nerr: [%v]", err)
@@ -204,11 +206,11 @@ func questionWriter() {
 		fmt.Print("\nQuestion: ")
 		questionResponse, _ := reader.ReadString('\n')
 		for optionCount := 0; optionCount < 4; optionCount++ {
-			fmt.Printf("\nOption %v: ", (optionCount + 1))
+			fmt.Printf("Option %v: ", (optionCount + 1))
 			optionResponse, _ := reader.ReadString('\n')
 			questionOptions = append(questionOptions, strings.TrimSpace(optionResponse))
 		}
-		fmt.Print("\nCorrect Answer (option number): ")
+		fmt.Print("Correct Answer (option number): ")
 		correctResponse, _ := reader.ReadString('\n')
 		convInt, errConv := strconv.Atoi(strings.TrimSpace(correctResponse))
 		if errConv != nil {
@@ -270,7 +272,6 @@ func endPrompt() {
 
 func questionInit(data string) {
 	resetTerminal()
-	// timer := make(chan int)
 	if len(strings.TrimSpace(data)) == 0 || !isJSON(strings.TrimSpace(data))  {
 		color.Red("Something is wrong with the input data! Check if the data in the JSON file is valid.")
 		return
@@ -282,6 +283,9 @@ func questionInit(data string) {
 	}
 	correctResponses := 0
 	incorrectResponses := 0
+	var correctQuestions []string = make([]string, 0)
+	var incorrectQuestions []string = make([]string, 0)
+	var answers []string = make([]string, 0)
 	for l := 0; l < len(m); l++ {
 		question := (m[l].(map[string]interface{}))["Question"]
 		options := (m[l].(map[string]interface{}))["Options"]
@@ -298,25 +302,29 @@ func questionInit(data string) {
 	}
 	for i := 0; i < len(m); i++ {
 		resetTerminal()
-		question := (m[i].(map[string]interface{}))["Question"]
+		question := (m[i].(map[string]interface{}))["Question"].(string)
 		options := (m[i].(map[string]interface{}))["Options"].([]interface{})
 		correct := (m[i].(map[string]interface{}))["Correct"].(float64)
-		fmt.Printf("%v %v   %v\n\n", color.New(color.BgWhite, color.FgBlack).Sprintf("Question"), color.HiWhiteString("%v", question), color.New(color.BgHiCyan, color.FgBlack).Sprintf(" Q: %v of %v ", (i + 1), len(m)))
-		for j := 0; j < len(options); j++ {
-			fmt.Printf("%v. %v\n", (j + 1), options[j])
-		}
-		// fmt.Print("\nYou have 30 seconds to answer!")
-		// go initiateCountdown(timer)
+		fmt.Printf("%v\n", color.New(color.BgWhite, color.FgBlack).Sprintf("Quiz initiated %v", color.New(color.FgBlack).Sprintf(" ( Q: %v of %v ) ", (i + 1), len(m))))
+		quizQuestionTableCreator(question)
+		fmt.Print("\n")
+		quizOptionTableCreator(options)
 		fmt.Print("\n\nAnswer: (1/2/3/4) ")
 		text, _ := reader.ReadString('\n')
 		if result, err := strconv.Atoi(strings.TrimSpace(text)); err != nil {
-			color.Red("Something went wrong! err: [%v]", err)
-			return
+			color.Red("Input is not a number! Considering input as incorrect answer ...")
+			incorrectQuestions = append(incorrectQuestions, question)
+			answers = append(answers, options[int(correct)].(string))
+			incorrectResponses++
 		} else if (result - 1) == int(correct) {
 			color.Green("\nCorrect Answer!")
+			correctQuestions = append(correctQuestions, question)
+			answers = append(answers, options[int(correct)].(string))
 			correctResponses++
 		} else {
 			color.Red("\nIncorrect Answer!")
+			incorrectQuestions = append(incorrectQuestions, question)
+			answers = append(answers, options[int(correct)].(string))
 			incorrectResponses++
 		}
 		if (i + 1) < len(m) {
@@ -328,9 +336,54 @@ func questionInit(data string) {
 				break
 			}
 		}
-		time.Sleep(999999999)
+		time.Sleep(time.Second * 1)
 	}
-	fmt.Printf("\n%v: %v of %v, %v: %v of %v", color.GreenString("Correct"), correctResponses, len(m), color.RedString("Incorrect"), incorrectResponses, len(m))
+	color.Green("Rendering answer sheet ...")
+	time.Sleep(time.Second * 2)
+	resetTerminal()
+	ClearTerminal()
+	fmt.Printf("%v\n", color.New(color.BgWhite, color.FgBlack).Sprintf("   Quiz Answer Table (may be larger than console window)  "))
+	finalQuestionAnswersTableCreator(correctQuestions, incorrectQuestions, answers)
+	fmt.Printf("\n%v: %v of %v, %v: %v of %v\n", color.New(color.BgGreen, color.FgBlack).Sprintf("Correct"), correctResponses, len(m), color.New(color.BgRed, color.FgBlack).Sprintf("Incorrect"), incorrectResponses, len(m))
+}
+
+func quizOptionTableCreator(options []interface{}) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleRounded)
+	t.AppendHeader(table.Row{"#", "   Options   "})
+	for j := 0; j < len(options); j++ {
+		t.AppendRow(table.Row{fmt.Sprintf("%v", j + 1), fmt.Sprintf("%v\n", options[j])})
+	}
+	t.Render()
+}
+
+func quizQuestionTableCreator(question string) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleLight)
+	t.AppendRow(table.Row{"   " + color.New(color.FgHiWhite).Sprintf("%v", question) + "   "})
+	t.AppendSeparator()
+	t.Render()
+}
+
+func finalQuestionAnswersTableCreator(correct []string, incorrect []string, answers []string) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleLight)
+	t.AppendHeader(table.Row{"#", "Question", "Answer", "State"})
+	rowNum := 1
+	for g := 0; g < len(correct); g++ {
+		t.AppendRow([]interface{}{rowNum, correct[g], answers[rowNum - 1], "✅"})
+		t.AppendSeparator()
+		rowNum++
+	}
+	for x := 0; x < len(incorrect); x++ {
+		t.AppendRow([]interface{}{rowNum, incorrect[x], answers[rowNum - 1], "❌"})
+		t.AppendSeparator()
+		rowNum++
+	}
+	t.Render()
 }
 
 func isJSON(s string) bool {
@@ -343,33 +396,21 @@ func resetTerminal() {
 	screen.MoveTopLeft()
 }
 
-// ----- Reserved Code ----- >
+func runCmd(name string, arg ...string) {
+    cmd := exec.Command(name, arg...)
+    cmd.Stdout = os.Stdout
+    cmd.Run()
+}
 
-// func initiateCountdown(timer chan int) {
-
-// 	for k := 30; k >= 0; k-- {
-// 		timer <- k
-// 		time.Sleep(time.Second * 1)
-// 	}
-
-// 	// writer := uilive.New()
-// 	// writer.Start()
-// 	// for k := 30; k >= 0; k-- {
-// 	// 	fmt.Fprintf(writer, "Time remaining: %v\n", k)
-// 	// 	time.Sleep(time.Second * 1)
-// 	// 	if k == 0 {
-// 	// 		fmt.Fprintln(writer, "Time gone!")
-// 	// 		if (currentQuestion + 1) < len(mapData) {
-// 	// 			fmt.Print(color.YellowString("\nProceed to next question? (y/n) "))
-// 	// 			proceedPrompt, _ := reader.ReadString('\n')
-// 	// 			if strings.TrimSpace(proceedPrompt) == "y" {
-// 	// 				color.Green("Proceeding ...")
-// 	// 				continue
-// 	// 			} else {
-// 	// 				break
-// 	// 			}
-// 	// 		}
-// 	// 	}
-// 	// }
-// 	// writer.Stop()
-// }
+func ClearTerminal() {
+    switch runtime.GOOS {
+    case "darwin":
+        runCmd("clear")
+    case "linux":
+        runCmd("clear")
+    case "windows":
+        runCmd("cmd", "/c", "cls")
+    default:
+        runCmd("clear")
+    }
+}
