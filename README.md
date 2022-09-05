@@ -48,5 +48,9 @@ QuizIO is still in early stages and a lot of features will come in the future al
 * [UPCOMING] Question order randomizer
 * [UPCOMING] Better UI and QoL improvements
 
+# Resources
+
+* Quiz API sample: [MockAPI](https://6312ff5cb466aa9b039104d1.mockapi.io/quizzes "Sample quiz data API for testing").
+
 # License
 [MIT](https://choosealicense.com/licenses/mit/)
