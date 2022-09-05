@@ -2,6 +2,13 @@
 
 QuizIO is a feature-rich terminal quiz app made with the Go programming language! You can use the program to easily take part in a quiz with data provided from a JSON file or API. You can create and edit the JSON file from a user-friendly interface from within the program.
 
+## Intallation
+
+As of now, only Windows installations are available and MacOS as well as linux installation methods are coming soon!
+`Windows Setup executable`: [QuizIO_Setup.exe (Mediafire download)](https://www.mediafire.com/file/z5v70yvarugdjtz/QuizIO_Setup.exe/file "QuizIO setup executable download").
+`MacOS installation`: [COMING SOON]
+`Linux installation`: [COMING SOON]
+
 ## Usage
 
 QuizIO is easier to use than you think! Most of the features you need will be found within the app. The app has five "modes" in a menu using which you can achieve different tasks.
