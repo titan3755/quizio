@@ -1,4 +1,4 @@
-[Imgur](https://imgur.com/23MaLy7)
+![QuizIO image banner](https://i.imgur.com/23MaLy7.png)
 
 # QuizIO
 
