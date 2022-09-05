@@ -1,3 +1,5 @@
+[Imgur](https://imgur.com/23MaLy7)
+
 # QuizIO
 
 QuizIO is a feature-rich terminal quiz app made with the Go programming language! You can use the program to easily take part in a quiz with data provided from a JSON file or API. You can create and edit the JSON file from a user-friendly interface from within the program.
