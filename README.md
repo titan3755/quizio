@@ -33,7 +33,7 @@ This mode can be used to get the quiz data from an API by providing the URL in t
 This mode can be used to modify a newly created or existing JSON file from within the app and you will not need to manually modify a JSON file from another editor. An option to wipe the provided JSON file will come as existing JSON files may not contain data in the required format. You can also proceed with the existing JSON file.
 #### `Preview data format mode:`
 This is not exactly a "mode" but a display of the required data format that is mandatory in the input JSON files or API data. If the JSON data is not in the format showed in this mode, the quiz will not be initiated and an error will occur.
-## Contributing
+# Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. Report encountered bugs as soon as possible to get a quick fix.
 
 Please make sure to update tests as appropriate.
