@@ -6,7 +6,7 @@ QuizIO is a feature-rich terminal quiz app made with the Go programming language
 
 # Installation
 
-As of now, only Windows installations are available and MacOS as well as linux installation methods are coming soon!
+As of now, only Windows installations are available and MacOS as well as linux installation methods are coming soon! Note that if you use the `Windows Setup executable` option, you will have to run the installed app as administrator or the app will not be able to create or write to files.
 <br />
 `Windows Setup executable`: [QuizIO_Setup.exe (Mediafire download)](https://www.mediafire.com/file/z5v70yvarugdjtz/QuizIO_Setup.exe/file "QuizIO setup executable download").
 <br />
