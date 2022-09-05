@@ -48,6 +48,17 @@ QuizIO is still in early stages and a lot of features will come in the future al
 * [UPCOMING] Question order randomizer
 * [UPCOMING] Better UI and QoL improvements
 
+# Screenshots
+Some screenshots are given below of the app in action! These screenshots were taken in the Windows terminal app.
+
+![main_menu](https://gcdnb.pbrd.co/images/TDDTEfbpVA5i.png?o=1)
+![quiz_initiated](https://gcdnb.pbrd.co/images/w6RJV2JlIjiB.png?o=1)
+![answer_table](https://gcdnb.pbrd.co/images/DAvzi3vtvyeG.png?o=1)
+![quiz_writer](https://gcdnb.pbrd.co/images/2J53tBYMGyAB.png?o=1)
+![json_format_mode](https://gcdnb.pbrd.co/images/5LLseOswO7Sb.png?o=1)
+![later_main_menu](https://gcdnb.pbrd.co/images/hefkNnK06oM5.png?o=1)
+
+
 # Resources
 
 * Quiz API sample: [MockAPI](https://6312ff5cb466aa9b039104d1.mockapi.io/quizzes "Sample quiz data API for testing").
